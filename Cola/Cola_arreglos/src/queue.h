@@ -9,7 +9,7 @@ typedef struct {
     Data datos[TAM];
     int head;
     int tail;
-    int len
+    int len;
 } Queue;
 
 Queue queue_create();
