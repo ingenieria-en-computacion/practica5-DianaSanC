@@ -8,7 +8,7 @@ typedef struct {
     Data *data;
     int head;
     int tail;
-    int len
+    int len;
 } Queue;
 
 Queue queue_create(int len);
