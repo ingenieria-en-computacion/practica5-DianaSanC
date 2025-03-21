@@ -1,40 +1,104 @@
-#include "node.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
 
-/**
- * Crea un nuevo nodo con los datos proporcionados y lo devuelve.
- * 
- * @param d Dato que se almacenará en el nuevo nodo.
- * @return Un apuntador al nuevo nodo creado. Si la creación falla, devuelve NULL.
- * @details Esta función asigna memoria dinámicamente para un nuevo nodo utilizando `malloc`.
- *          Si la asignación de memoria falla, la función devuelve NULL. El nodo creado
- *          tiene sus campos inicializados, y el campo de datos se establece con el valor
- *          proporcionado en el parámetro `d`, el siguiente .
- */
-Node *new_node(Data d){
+typedef int Data;
 
+// Nodo
+typedef struct Node {
+    Data data;
+    struct Node* next;
+} Node;
+
+Node* new_node(Data d) {
+    Node* nuevo = (Node*)malloc(sizeof(Node));
+    if (nuevo == NULL) return NULL;
+    
+    nuevo->data = d;
+    nuevo->next = NULL;
+    return nuevo;
 }
 
-/**
- * Elimina un nodo y libera la memoria asociada a él.
- * 
- * @param n Apuntador al nodo que se desea eliminar.
- * @details Esta función libera la memoria asignada dinámicamente para el nodo utilizando `free`.
- *          Si el apuntador pasado es NULL, la función no realiza ninguna operación.
- *          Es responsabilidad del llamante asegurarse de que el nodo ya no se utiliza después
- *          de ser eliminado. Está función solo libera nodos cuyo enlace al siguiente es nulo
- */
-void delete_node(Node* n){
-
+void delete_node(Node* n) {
+    if (n != NULL && n->next == NULL) {
+        free(n);
+    }
 }
 
-/**
- * Imprime la información contenida en un nodo.
- * 
- * @param n Apuntador al nodo que se desea imprimir.
- * @details Esta función imprime los campos del nodo, como su valor y punteros a otros nodos,
- *          en un formato legible. Si el puntero pasado es NULL, la función imprime un mensaje
- *          indicando que el nodo es inválido. La salida se dirige a la salida estándar (stdout).
- */
-void print_node(Node* n){
+void print_node(Node* n) {
+    if (n == NULL) {
+        printf("Nodo inválido (NULL)\n");
+        return;
+    }
+    printf("Nodo [Dato: %d | Siguiente: %p]\n", 
+           n->data, 
+           (void*)n->next);
+}
 
+
+typedef struct {
+    Node* head;
+    Node* tail;
+} Queue;
+
+Queue* queue_create() {
+    Queue* q = (Queue*)malloc(sizeof(Queue));
+    if (q == NULL) return NULL;
+    
+    q->head = NULL;
+    q->tail = NULL;
+    return q;
+}
+
+void queue_enqueue(Queue* q, Data d) {
+    if (q == NULL) return;
+    
+    Node* nuevo = new_node(d);
+    if (nuevo == NULL) return;
+    
+    if (q->head == NULL) {
+        q->head = q->tail = nuevo;
+    } else {
+        q->tail->next = nuevo;
+        q->tail = nuevo;
+    }
+}
+
+Data queue_dequeue(Queue* q) {
+    if (q == NULL || q->head == NULL) return -1;
+    
+    Node* temp = q->head;
+    Data valor = temp->data;
+    
+    q->head = q->head->next;
+    if (q->head == NULL) {
+        q->tail = NULL;
+    }
+    
+    temp->next = NULL;  // Requisito para delete_node()
+    delete_node(temp);
+    return valor;
+}
+
+bool queue_is_empty(Queue* q) {
+    return (q == NULL) ? true : (q->head == NULL);
+}
+
+Data queue_front(Queue* q) {
+    if (queue_is_empty(q)) return -1;
+    return q->head->data;
+}
+
+void queue_empty(Queue* q) {
+    if (q == NULL) return;
+    while (!queue_is_empty(q)) {
+        queue_dequeue(q);
+    }
+}
+
+void queue_delete(Queue* q) {
+    if (q == NULL) return;
+    
+    queue_empty(q);
+    free(q);
 }
